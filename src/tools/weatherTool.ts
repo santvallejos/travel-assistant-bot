@@ -10,7 +10,7 @@ dotenv.config();
 // Tool para consulta de clima utilizando OpenWeatherMap
 // Modificada para devolver un objeto con los datos relevantes.
 // -------------------------------------
-const weatherQueryTool = tool(
+export const weatherQueryTool = tool(
     async ({ destination, date }) => {
 
         try {
@@ -50,7 +50,7 @@ const weatherQueryTool = tool(
 // -------------------------------------
 // Tool combinada: Sugerencias para empacar influenciadas por el clima
 // -------------------------------------
-export const enhancedPackingSuggestionsTool = tool(
+export const packingSuggestionsTool = tool(
     async ({ destination, duration }) => {
         // Sugerencias básicas que se deben llevar en cualquier viaje:
         const baseSuggestions = [
