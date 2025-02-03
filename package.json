@@ -19,8 +19,9 @@
     "typescript": "^5.7.3"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.36.3",
+    "@langchain/anthropic": "^0.3.12",
     "@langchain/community": "^0.3.28",
-    "@langchain/core": "^0.3.37",
     "@langchain/langgraph": "^0.2.44",
     "@langchain/ollama": "^0.1.5",
     "@langchain/openai": "^0.4.2",

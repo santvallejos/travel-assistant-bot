@@ -1,101 +1,97 @@
 import axios from "axios";
 import dotenv from "dotenv";
 import { tool } from "@langchain/core/tools";
-import { WeatherService } from "../services/weatherService";
 import { z } from "zod";
 
 dotenv.config();
 
 // -------------------------------------
-// Tool para consulta de clima utilizando OpenWeatherMap
-// Modificada para devolver un objeto con los datos relevantes.
+// Tool for querying weather using OpenWeatherMap
 // -------------------------------------
 export const weatherQueryTool = tool(
-    async ({ destination, date }) => {
+    async ({ destination }) => {
+        // Clean and encode the destination string for URL usage
+        const cleanedDestination = encodeURIComponent(destination.trim());
+        const API_KEY = process.env.OPENWEATHERMAP_API_KEY;
+        const url = `https://api.openweathermap.org/data/2.5/weather?q=${cleanedDestination}&units=metric&appid=${API_KEY}`;
 
         try {
-            // Obtenemos el clima del destino utilizando la API de OpenWeatherMap
-            const weatherService = new WeatherService();
-            const data = await weatherService.getWeather(destination);
-
-            // Extraemos la información relevante:
-            const temperature = data.main.temp;
-            const weatherDescription = data.weather[0].description;
-            const humidity = data.main.humidity;
-            const windSpeed = data.wind.speed;
-
-
-            // Retornamos un objeto con la información
-            return { temperature, weatherDescription, humidity, windSpeed };
-        } catch (error: any) {
-            console.error("Error getting weather data:", error);
-            // En caso de error se retorna un objeto por defecto, o se podría lanzar un error
-            return { temperature: 20, weatherDescription: "Weather data not available", humidity: 0, windSpeed: 0 };
+            const response = await axios.get(url);
+            const data = response.data;
+            return {
+                temperature: data.main.temp,
+                weather: data.weather[0].description,
+                city: data.name // Return the official city name
+            };
+        } catch (error) {
+            console.error("Error fetching weather from API:", error);
+            return { error: "Unable to retrieve weather information for the specified destination." };
         }
-
     },
     {
         name: "weather_query",
         description:
-            "Query the current weather for a given destination using the OpenWeatherMap API.",
+            "Search for the city or location in the input and return the current weather (temperature and conditions). Use this tool for real-time weather questions.",
         schema: z.object({
-            destination: z.string().describe("The city or location for the weather query"),
-            date: z.string().optional().describe("The date for which you want to query the weather (in this example, it is ignored, the current weather is obtained)"),
-        }),
-
-
+            destination: z.string().describe("City or place to query the weather")
+        })
     }
 );
 
 // -------------------------------------
-// Tool combinada: Sugerencias para empacar influenciadas por el clima
+// Combined Tool: Packing Suggestions influenced by the weather
 // -------------------------------------
 export const packingSuggestionsTool = tool(
     async ({ destination, duration }) => {
-        // Sugerencias básicas que se deben llevar en cualquier viaje:
-        const baseSuggestions = [
-            "personal items",
-            "charger",
-            "passport",
-            "inner clothes",
-            "important objects for the trip",
-        ];
+        // Assume that 'destination' is a string containing the city name (or a message including it)
+        // Clean and encode the destination:
+        const cleanedDestination = encodeURIComponent(destination.trim());
+        const API_KEY = process.env.OPENWEATHERMAP_API_KEY;
+        const url = `https://api.openweathermap.org/data/2.5/weather?q=${cleanedDestination}&units=metric&appid=${API_KEY}`;
 
-
-        // Consultamos el clima del destino
-        const weatherInfo = await weatherQueryTool.call({ destination, date: new Date().toISOString() });
-
-        // Sugerencias adicionales según la temperatura:
-        let weatherBasedSuggestions: string[] = [];
-        if (weatherInfo.temperature > 25) {
-            weatherBasedSuggestions.push("light and comfortable clothes", "hat", "sunscreen");
-        } else if (weatherInfo.temperature < 10) {
-            weatherBasedSuggestions.push("warm clothes", "coat", "gloves", "scarf");
-        } else {
-            weatherBasedSuggestions.push("clothes for temperate weather");
+        let weatherData;
+        try {
+            const response = await axios.get(url);
+            weatherData = response.data;
+        } catch (error) {
+            console.error("Error fetching weather for packing suggestions:", error);
+            return { error: "Unable to retrieve weather information for the provided destination." };
         }
 
+        const temperature = weatherData.main.temp;
+        const weatherDescription = weatherData.weather[0].description;
 
-        // Si la duración del viaje es larga, se pueden agregar elementos extras:
-        if (duration > 7) {
-            baseSuggestions.push("basic medicines", "laundry items");
-        }
+        // Build the prompt for packing suggestions including weather information and trip duration
+        const packingPrompt = `You are an expert in travel planning and packing recommendations.
+Destination: ${weatherData.name}
+Trip Duration: ${duration} days
+Current Weather: ${temperature}°C with conditions "${weatherDescription}"
+Generate a detailed packing list that includes:
+- Essential personal items (e.g., chargers, passport, documents, etc.)
+- Clothing and accessories suitable for the current weather, with explanations on what to pack and what can be omitted.`;
 
+        // Import and instantiate the ChatOllama model dynamically if needed
+        const { ChatOllama } = await import("@langchain/ollama");
+        const model = new ChatOllama({
+            model: "llama3.2",
+            temperature: 1
+        });
+        const responsePacking = await model.invoke(packingPrompt);
 
-        // Combinamos las sugerencias
-        const allSuggestions = [...baseSuggestions, ...weatherBasedSuggestions];
-
-        // Armamos la respuesta con información del clima para mayor contexto
-        return `For a trip to ${destination} of ${duration} days, considering that the current weather is "${weatherInfo.weatherDescription}" with a temperature of ${weatherInfo.temperature}°C, we suggest you to bring: ${allSuggestions.join(", ")}.`;
-
+        return {
+            destination: weatherData.name,
+            temperature,
+            weather: weatherDescription,
+            packing_suggestions: responsePacking.content || responsePacking
+        };
     },
     {
         name: "enhanced_packing_suggestions",
         description:
-            "Generates a list of packing suggestions based on the destination, the duration of the trip, and the current weather conditions.",
+            "Generates packing recommendations based on the current weather at the destination and the trip duration. Use this tool ONLY when the user asks for packing help.",
         schema: z.object({
-            destination: z.string().describe("The destination of the trip, for example, 'Madrid'"),
-            duration: z.number().describe("The duration of the trip in days"),
-        }),
+            destination: z.string().describe("Name or description containing the travel destination"),
+            duration: z.number().min(1).describe("Trip duration in days")
+        })
     }
 );
