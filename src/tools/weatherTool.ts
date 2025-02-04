@@ -53,13 +53,12 @@ export const packingSuggestionsTool = tool(
         const temperature = weatherData.main.temp;
         const weatherDescription = weatherData.weather[0].description;
 
-        const packingPrompt = `You are an expert in travel planning and packing recommendations.
+        // Nuevo prompt más breve y conciso
+        const packingPrompt = `You are a travel packing expert.
                                 Destination: ${weatherData.name}
                                 Trip Duration: ${duration} days
-                                Current Weather: ${temperature}°C with conditions "${weatherDescription}"
-                                Generate a detailed packing list that includes:
-                                - Essential personal items (e.g., chargers, passport, documents, etc.)
-                                - Clothing and accessories suitable for the current weather, with explanations on what to pack and what can be omitted.`;
+                                Current Weather: ${temperature}°C with "${weatherDescription}"
+                                Provide a concise bullet-point packing list with only the essential items. Do not include extra explanations.`;
 
         const responsePacking = await model.invoke(packingPrompt);
 
@@ -80,3 +79,4 @@ export const packingSuggestionsTool = tool(
         })
     }
 );
+

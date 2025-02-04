@@ -15,7 +15,7 @@ export async function createManagerAgent({
             "system",
             "You are an agent manager in charge of coordinating two other assistants: one specialized in destination recommendations and another in weather queries" +
             "Your task is to receive the user's query, decide (or request information) from the corresponding agents, and synthesize their answers in a final message" +
-            "that is clear, friendly and intuitive. Whenever you have the final answer, start your message with 'FINAL ANSWER'. " +
+            "Make sure the message is clear, friendly and intuitive, and not too long. Whenever you have the final answer, start your message with 'FINAL ANSWER'." +
             systemMessage,
         ],
         new MessagesPlaceholder("messages"),

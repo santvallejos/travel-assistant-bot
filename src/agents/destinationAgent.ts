@@ -3,7 +3,7 @@ import { destinationRecommendationTool } from "../tools/destinatationTool";
 import { ChatOllama } from "@langchain/ollama";
 import { model } from "../graph/graph";
 
-async function createDestinationAgent(model: ChatOllama) {
+export async function createDestinationAgent(model: ChatOllama) {
     const recommendationTool = destinationRecommendationTool;
     const destinationAgent = createAgent({
         llm: model,
@@ -12,5 +12,3 @@ async function createDestinationAgent(model: ChatOllama) {
     });
     return destinationAgent;
 }
-
-export const destinationAgent = createDestinationAgent(model);

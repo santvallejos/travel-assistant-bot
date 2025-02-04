@@ -3,7 +3,7 @@ import { weatherQueryTool, packingSuggestionsTool } from "../tools/weatherTool";
 import { ChatOllama } from "@langchain/ollama";
 import { model } from "../graph/graph";
 
-async function createWeatherAgent(model: ChatOllama) {
+export async function createWeatherAgent(model: ChatOllama) {
   const weatherAgent = createAgent({
     llm: model,
     tools: [weatherQueryTool, packingSuggestionsTool],
@@ -20,5 +20,3 @@ async function createWeatherAgent(model: ChatOllama) {
   });
   return await weatherAgent;
 }
-
-export const weatherAgent = createWeatherAgent(model);
