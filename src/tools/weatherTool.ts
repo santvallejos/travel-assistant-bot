@@ -2,15 +2,12 @@ import axios from "axios";
 import dotenv from "dotenv";
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
+import { model } from "../graph/graph";
 
 dotenv.config();
 
-// -------------------------------------
-// Tool for querying weather using OpenWeatherMap
-// -------------------------------------
 export const weatherQueryTool = tool(
     async ({ destination }) => {
-        // Clean and encode the destination string for URL usage
         const cleanedDestination = encodeURIComponent(destination.trim());
         const API_KEY = process.env.OPENWEATHERMAP_API_KEY;
         const url = `https://api.openweathermap.org/data/2.5/weather?q=${cleanedDestination}&units=metric&appid=${API_KEY}`;
@@ -38,13 +35,8 @@ export const weatherQueryTool = tool(
     }
 );
 
-// -------------------------------------
-// Combined Tool: Packing Suggestions influenced by the weather
-// -------------------------------------
 export const packingSuggestionsTool = tool(
     async ({ destination, duration }) => {
-        // Assume that 'destination' is a string containing the city name (or a message including it)
-        // Clean and encode the destination:
         const cleanedDestination = encodeURIComponent(destination.trim());
         const API_KEY = process.env.OPENWEATHERMAP_API_KEY;
         const url = `https://api.openweathermap.org/data/2.5/weather?q=${cleanedDestination}&units=metric&appid=${API_KEY}`;
@@ -61,21 +53,14 @@ export const packingSuggestionsTool = tool(
         const temperature = weatherData.main.temp;
         const weatherDescription = weatherData.weather[0].description;
 
-        // Build the prompt for packing suggestions including weather information and trip duration
         const packingPrompt = `You are an expert in travel planning and packing recommendations.
-Destination: ${weatherData.name}
-Trip Duration: ${duration} days
-Current Weather: ${temperature}°C with conditions "${weatherDescription}"
-Generate a detailed packing list that includes:
-- Essential personal items (e.g., chargers, passport, documents, etc.)
-- Clothing and accessories suitable for the current weather, with explanations on what to pack and what can be omitted.`;
+                                Destination: ${weatherData.name}
+                                Trip Duration: ${duration} days
+                                Current Weather: ${temperature}°C with conditions "${weatherDescription}"
+                                Generate a detailed packing list that includes:
+                                - Essential personal items (e.g., chargers, passport, documents, etc.)
+                                - Clothing and accessories suitable for the current weather, with explanations on what to pack and what can be omitted.`;
 
-        // Import and instantiate the ChatOllama model dynamically if needed
-        const { ChatOllama } = await import("@langchain/ollama");
-        const model = new ChatOllama({
-            model: "llama3.2",
-            temperature: 1
-        });
         const responsePacking = await model.invoke(packingPrompt);
 
         return {
