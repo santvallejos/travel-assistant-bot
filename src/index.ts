@@ -11,7 +11,7 @@ app.use(Express.json());
 app.use(morgan('dev'));
 
 //Controllador de metodo POST
-app.post("/api/bot", chatController);
+app.post("/api/chat", chatController);
 
 app.get("/history", (req, res) => {
     res.json({ history: conversationState.messages });

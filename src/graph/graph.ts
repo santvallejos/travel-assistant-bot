@@ -19,18 +19,23 @@ export let conversationState: typeof AgentState.State = {
     sender: "user",
 };
 
-export const model = new ChatOllama({
+export const model1b = new ChatOllama({
+    model: "llama3.2:1b",
+    temperature: 0
+});
+
+export const model3b = new ChatOllama({
     model: "llama3.2",
     temperature: 0
 });
 
-const weatherAgent = createWeatherAgent(model);
-const destinationAgent = createDestinationAgent(model);
+const weatherAgent = createWeatherAgent(model3b);
+const destinationAgent = createDestinationAgent(model1b);
 
 //Declracion de agentes que son nodos
 async function managerNode(state: typeof AgentState.State, config?: RunnableConfig) {
     const managerAgent = await createManagerAgent({
-        llm: model,
+        llm: model3b,
         systemMessage: "Ask pertinent questions and coordinate the responses of the parties interested in the destination and the weather, using clear and concise language, you only have to write what is necessary, do not extend the message too much.",
     });
 

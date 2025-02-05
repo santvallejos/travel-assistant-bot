@@ -2,7 +2,8 @@ import axios from "axios";
 import dotenv from "dotenv";
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
-import { model } from "../graph/graph";
+import { ChatOllama } from "@langchain/ollama";
+import { model3b } from "../graph/graph";
 
 dotenv.config();
 
@@ -18,7 +19,7 @@ export const weatherQueryTool = tool(
             return {
                 temperature: data.main.temp,
                 weather: data.weather[0].description,
-                city: data.name // Return the official city name
+                city: data.name
             };
         } catch (error) {
             console.error("Error fetching weather from API:", error);
@@ -53,14 +54,15 @@ export const packingSuggestionsTool = tool(
         const temperature = weatherData.main.temp;
         const weatherDescription = weatherData.weather[0].description;
 
-        // Nuevo prompt más breve y conciso
-        const packingPrompt = `You are a travel packing expert.
+        const packingPrompt = `You are an expert in travel planning and packing recommendations.
                                 Destination: ${weatherData.name}
                                 Trip Duration: ${duration} days
-                                Current Weather: ${temperature}°C with "${weatherDescription}"
-                                Provide a concise bullet-point packing list with only the essential items. Do not include extra explanations.`;
+                                Current Weather: ${temperature}°C with conditions "${weatherDescription}"
+                                Generate a detailed packing list that includes:
+                                - Essential personal items (e.g., chargers, passport, documents, etc.)
+                                - Clothing and accessories suitable for the current weather, with explanations on what to pack and what can be omitted.`;
 
-        const responsePacking = await model.invoke(packingPrompt);
+        const responsePacking = await model3b.invoke(packingPrompt);
 
         return {
             destination: weatherData.name,
@@ -79,4 +81,3 @@ export const packingSuggestionsTool = tool(
         })
     }
 );
-

@@ -1,7 +1,7 @@
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 import { ChatOllama } from "@langchain/ollama";
-import { model } from "../graph/graph";
+import { model1b } from "../graph/graph";
 
 export const destinationRecommendationTool = tool(
     async ({ preferences }: { preferences: string }) => {
@@ -18,7 +18,7 @@ export const destinationRecommendationTool = tool(
                         analyze the query and recommend the ideal tourist destination. Explain in detail your reasoning (considering climate, culture, geography, etc.) as if it were your personal suggestion.`
                         .trim();
 
-        const llmResponse = await model.invoke(prompt);
+        const llmResponse = await model1b.invoke(prompt);
 
         return llmResponse;
     },

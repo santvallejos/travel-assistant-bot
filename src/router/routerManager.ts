@@ -1,29 +1,28 @@
 import { AIMessage } from "@langchain/core/messages";
 import { AgentState } from "../agents/agentState";
-import { model } from "../graph/graph";
+import { model1b, model3b } from "../graph/graph";
 
-// Función asíncrona que utiliza el LLM para determinar la intención
 async function detectUserIntentionUsingLLM(message: string): Promise<"destination" | "weather" | "ambiguous"> {
     const prompt = `
-                    Analyze the following user query: "${message}".
-                    Determine whether the primary intent is "destination"(destination recommendation) or "weather" (weather query or luggage recommendation).
-                    If you can't determine clearly, respond with "ambiguous".
-                    Respond with only one of these words: destination, weather, ambiguous.
-                    `.trim();
+Analyze the following user query: "${message}".
+Determine whether the primary intent is:
+- "destination": when the user asks for travel recommendations, places to visit, or general destination suggestions.
+- "weather": when the user asks for current weather information or packing recommendations (queries containing words like "weather", "temperature", "pack", "luggage", "suitcase", "packing", etc.).
+If you cannot determine clearly, respond with "ambiguous".
+Respond with only one of these words: destination, weather, ambiguous.
+    `.trim();
 
-    // Se invoca el modelo con el prompt creado
-    const response = await model.invoke(prompt);
-
-    // Se procesa la respuesta: se espera que el LLM devuelva exactamente una de las palabras requeridas
-    const classification = typeof response.content === 'string' ? response.content.trim().toLowerCase() : 'ambiguous';
+    const response = await model3b.invoke(prompt);
+    const classification = typeof response.content === 'string'
+        ? response.content.trim().toLowerCase()
+        : 'ambiguous';
 
     if (["destination", "weather", "ambiguous"].includes(classification)) {
         return classification as "destination" | "weather" | "ambiguous";
     }
-
-    // En caso de que la respuesta no sea la esperada, se devuelve "ambiguous"
     return "ambiguous";
 }
+
 
 
 export async function routerManager(state: typeof AgentState.State) {
