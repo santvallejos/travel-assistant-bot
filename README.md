@@ -65,7 +65,7 @@ npm install
     PORT=####
     OPENWEATHERMAP_API_KEY=##############
 
-4.Define the artificial intelligence model you are going to use(define it in the graph)
+4.Define the artificial intelligence model you are going to use(define it in the graph) <br>
 In my case I used llama3.2 locally with Ollama but it can be easily adapted to other models, such as OpenIA, Anthropic, etc.
 
     const model = new ChatOllama({
@@ -91,11 +91,11 @@ This app is an AI-based travel assistant that helps users plan their trips by pr
 
 ## characteristics
 
-✔️ Personalized responses: Uses AI to analyze the user's query and generate tailored responses.
-✔️ Real-time weather query: Obtains weather data from OpenWeatherMap to improve the accuracy of recommendations.
-✔️ Packing suggestions: Generates lists of essential items based on the temperature and conditions of the destination.
-✔️ Conversation management: The assistant can answer questions about different aspects of a trip.
-✔️ Easy integration: Exposes a REST API that can be consumed from any application.
+✔️ Personalized responses: Uses AI to analyze the user's query and generate tailored responses.<br>
+✔️ Real-time weather query: Obtains weather data from OpenWeatherMap to improve the accuracy of recommendations.<br>
+✔️ Packing suggestions: Generates lists of essential items based on the temperature and conditions of the destination.<br>
+✔️ Conversation management: The assistant can answer questions about different aspects of a trip.<br>
+✔️ Easy integration: Exposes a REST API that can be consumed from any application.<br>
 
 ## author
 
