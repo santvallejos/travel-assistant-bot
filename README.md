@@ -65,7 +65,7 @@ npm install
     PORT=####
     OPENWEATHERMAP_API_KEY=##############
 
-4.Define the artificial intelligence model you are going to use(define it in the graph)
+4.Define the artificial intelligence model you are going to use(define it in the graph) <br>
 In my case I used llama3.2 locally with Ollama but it can be easily adapted to other models, such as OpenIA, Anthropic, etc.
 
     const model = new ChatOllama({
